@@ -307,12 +307,14 @@ body { background: var(--black); overflow-x: hidden; }
   overflow: hidden;
   position: relative;
   z-index: 10;
+  width: 100%;
 }
 
 .ticker-track {
   display: flex;
   gap: 32px;
   white-space: nowrap;
+  width: max-content;
   animation: ticker-scroll 30s linear infinite;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -448,6 +450,7 @@ body { background: var(--black); overflow-x: hidden; }
   position: relative;
   z-index: 10;
   background: var(--black);
+  overflow: hidden;
 }
 
 .evidence-title {
@@ -474,16 +477,17 @@ body { background: var(--black); overflow-x: hidden; }
 
 .evidence-scroll {
   display: flex;
-  gap: 16px;
-  padding: 0 40px;
+  gap: 20px;
+  padding: 40px calc(50vw - 130px);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.evidence-scroll::-webkit-scrollbar { height: 3px; }
-.evidence-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-.evidence-scroll::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+.evidence-scroll::-webkit-scrollbar { display: none; }
 
 .evidence-card {
   flex-shrink: 0;
@@ -493,8 +497,30 @@ body { background: var(--black); overflow-x: hidden; }
   overflow: hidden;
   position: relative;
   border: 1px solid var(--muted-low);
-  scroll-snap-align: start;
-  transition: all 0.3s ease;
+  scroll-snap-align: center;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.4s ease,
+              opacity 0.4s ease,
+              filter 0.4s ease;
+  transform: scale(0.82);
+  opacity: 0.5;
+  filter: brightness(0.6);
+  will-change: transform, opacity, filter;
+}
+
+.evidence-card.active {
+  transform: scale(1);
+  opacity: 1;
+  filter: brightness(1);
+  border-color: var(--gold);
+}
+
+.evidence-card.active .vid-sound { opacity: 1; }
+
+.evidence-card.near {
+  transform: scale(0.9);
+  opacity: 0.7;
+  filter: brightness(0.8);
 }
 
 .evidence-card video {
@@ -505,10 +531,8 @@ body { background: var(--black); overflow-x: hidden; }
 }
 
 .evidence-card:hover {
-  transform: scale(1.03);
-  border-color: var(--gold);
+  border-color: var(--gold-dim);
 }
-
 .evidence-card:hover .vid-sound { opacity: 1; }
 
 .vid-sound {
@@ -526,23 +550,45 @@ body { background: var(--black); overflow-x: hidden; }
   opacity: 0;
   transition: opacity 0.3s ease;
   line-height: 1;
+  z-index: 6;
 }
 
 .evidence-fade {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 60px;
+  width: 120px;
   z-index: 5;
   pointer-events: none;
 }
 .evidence-fade-left {
   left: 0;
-  background: linear-gradient(to right, var(--black), transparent);
+  background: linear-gradient(to right, var(--black) 0%, transparent 100%);
 }
 .evidence-fade-right {
   right: 0;
-  background: linear-gradient(to left, var(--black), transparent);
+  background: linear-gradient(to left, var(--black) 0%, transparent 100%);
+}
+
+/* Gallery scrollbar track below */
+.evidence-scrollbar {
+  width: 200px;
+  height: 2px;
+  background: var(--muted-low);
+  border-radius: 1px;
+  margin: 32px auto 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.evidence-scrollbar-thumb {
+  height: 100%;
+  width: 30%;
+  background: var(--gold);
+  border-radius: 1px;
+  transition: left 0.15s ease;
+  position: absolute;
+  left: 0;
 }
 
 /* ========== QUOTE ========== */
@@ -704,7 +750,7 @@ body { background: var(--black); overflow-x: hidden; }
   .stats-grid { grid-template-columns: 1fr; }
 
   .evidence-card { width: 180px; height: 320px; }
-  .evidence-scroll { padding: 0 20px; }
+  .evidence-scroll { padding: 40px calc(50vw - 90px); gap: 14px; }
 
   .quote-section { padding: 100px 20px; }
 

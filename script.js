@@ -185,6 +185,62 @@ document.querySelectorAll('.vid-sound').forEach(btn => {
   });
 });
 
+/* ========== VIDEO GALLERY CAROUSEL FOCUS ========== */
+const evidenceScroll = document.querySelector('.evidence-scroll');
+const evidenceCards = document.querySelectorAll('.evidence-card');
+const scrollbarThumb = document.querySelector('.evidence-scrollbar-thumb');
+
+function updateGalleryFocus() {
+  if (!evidenceScroll || evidenceCards.length === 0) return;
+
+  const scrollRect = evidenceScroll.getBoundingClientRect();
+  const center = scrollRect.left + scrollRect.width / 2;
+
+  let closestIdx = 0;
+  let closestDist = Infinity;
+
+  evidenceCards.forEach((card, i) => {
+    const cardRect = card.getBoundingClientRect();
+    const cardCenter = cardRect.left + cardRect.width / 2;
+    const dist = Math.abs(center - cardCenter);
+
+    card.classList.remove('active', 'near');
+
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestIdx = i;
+    }
+  });
+
+  evidenceCards.forEach((card, i) => {
+    const diff = Math.abs(i - closestIdx);
+    if (diff === 0) card.classList.add('active');
+    else if (diff === 1) card.classList.add('near');
+  });
+
+  // update scrollbar thumb
+  if (scrollbarThumb) {
+    const maxScroll = evidenceScroll.scrollWidth - evidenceScroll.clientWidth;
+    const pct = maxScroll > 0 ? evidenceScroll.scrollLeft / maxScroll : 0;
+    scrollbarThumb.style.left = (pct * 70) + '%';
+  }
+}
+
+if (evidenceScroll) {
+  evidenceScroll.addEventListener('scroll', updateGalleryFocus, { passive: true });
+  // also handle click-to-center
+  evidenceCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const scrollRect = evidenceScroll.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const offset = cardRect.left + cardRect.width / 2 - scrollRect.left - scrollRect.width / 2;
+      evidenceScroll.scrollBy({ left: offset, behavior: 'smooth' });
+    });
+  });
+  // initial state
+  setTimeout(updateGalleryFocus, 100);
+}
+
 /* ========== SCROLL ANIMATIONS ========== */
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
