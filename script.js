@@ -79,9 +79,9 @@ heroSoundBtn.addEventListener('click', () => {
     // volume ramp
     let vol = 0;
     const ramp = setInterval(() => {
-      vol += 0.4 / (1500 / 30);
-      if (vol >= 0.4) {
-        vol = 0.4;
+      vol += 0.5 / (1500 / 30);
+      if (vol >= 0.5) {
+        vol = 0.5;
         clearInterval(ramp);
       }
       heroVideo.volume = vol;

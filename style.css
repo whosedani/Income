@@ -478,7 +478,7 @@ body { background: var(--black); overflow-x: hidden; }
 .evidence-scroll {
   display: flex;
   gap: 20px;
-  padding: 40px calc(50vw - 220px);
+  padding: 40px calc(50vw - 270px);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -491,7 +491,7 @@ body { background: var(--black); overflow-x: hidden; }
 
 .evidence-card {
   flex-shrink: 0;
-  width: 440px;
+  width: 540px;
   height: 780px;
   border-radius: 12px;
   overflow: hidden;
