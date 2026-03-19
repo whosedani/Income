@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INCOME — Admin</title>
+<link rel="icon" href="favicon.ico">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    color: #e8e8e8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .panel {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 40px;
+  }
+  h1 {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #B8A06A;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+    margin-top: 20px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #e8e8e8;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: #B8A06A; }
+  input[type="password"] { font-family: inherit; }
+  .btn {
+    width: 100%;
+    margin-top: 28px;
+    padding: 14px;
+    background: #B8A06A;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: #cdb578; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg {
+    margin-top: 16px;
+    font-size: 12px;
+    text-align: center;
+    min-height: 18px;
+  }
+  .msg.ok { color: #B8A06A; }
+  .msg.err { color: #e85555; }
+
+  /* Auth wall */
+  #authSection, #configSection { display: none; }
+  #authSection.active, #configSection.active { display: block; }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>INCOME — Admin</h1>
+
+  <div id="authSection" class="active">
+    <label for="adminPass">Password</label>
+    <input type="password" id="adminPass" placeholder="Enter admin password" autocomplete="off">
+    <button class="btn" id="authBtn">Authenticate</button>
+    <div class="msg" id="authMsg"></div>
+  </div>
+
+  <div id="configSection">
+    <label for="fieldCA">Contract Address</label>
+    <input type="text" id="fieldCA" placeholder="Token contract address">
+
+    <label for="fieldTwitter">Twitter URL</label>
+    <input type="text" id="fieldTwitter" placeholder="https://x.com/...">
+
+    <label for="fieldCommunity">Community URL</label>
+    <input type="text" id="fieldCommunity" placeholder="https://t.me/... or discord link">
+
+    <label for="fieldBuy">Buy URL</label>
+    <input type="text" id="fieldBuy" placeholder="https://pump.fun/...">
+
+    <button class="btn" id="saveBtn">Save</button>
+    <div class="msg" id="saveMsg"></div>
+  </div>
+</div>
+
+<script>
+let authHash = '';
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Auth
+document.getElementById('authBtn').addEventListener('click', async () => {
+  const pass = document.getElementById('adminPass').value.trim();
+  if (!pass) return;
+
+  authHash = await sha256(pass);
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hash: authHash, action: 'verify' })
+    });
+
+    if (res.ok) {
+      document.getElementById('authSection').classList.remove('active');
+      document.getElementById('configSection').classList.add('active');
+      loadCurrentConfig();
+    } else {
+      document.getElementById('authMsg').textContent = 'Invalid password.';
+      document.getElementById('authMsg').className = 'msg err';
+    }
+  } catch (e) {
+    document.getElementById('authMsg').textContent = 'Connection error.';
+    document.getElementById('authMsg').className = 'msg err';
+  }
+});
+
+document.getElementById('adminPass').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('authBtn').click();
+});
+
+async function loadCurrentConfig() {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('fieldCA').value = data.ca || '';
+      document.getElementById('fieldTwitter').value = data.twitter || '';
+      document.getElementById('fieldCommunity').value = data.community || '';
+      document.getElementById('fieldBuy').value = data.buy || '';
+    }
+  } catch (e) {}
+}
+
+// Save
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('saveBtn');
+  const msg = document.getElementById('saveMsg');
+  btn.disabled = true;
+
+  const payload = {
+    hash: authHash,
+    action: 'save',
+    config: {
+      ca: document.getElementById('fieldCA').value.trim(),
+      twitter: document.getElementById('fieldTwitter').value.trim(),
+      community: document.getElementById('fieldCommunity').value.trim(),
+      buy: document.getElementById('fieldBuy').value.trim()
+    }
+  };
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      msg.textContent = 'Saved.';
+      msg.className = 'msg ok';
+    } else {
+      const err = await res.json().catch(() => ({}));
+      msg.textContent = err.error || 'Save failed.';
+      msg.className = 'msg err';
+    }
+  } catch (e) {
+    msg.textContent = 'Connection error.';
+    msg.className = 'msg err';
+  }
+
+  btn.disabled = false;
+  setTimeout(() => { msg.textContent = ''; }, 3000);
+});
+</script>
+</body>
+</html>
