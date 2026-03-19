@@ -478,7 +478,7 @@ body { background: var(--black); overflow-x: hidden; }
 .evidence-scroll {
   display: flex;
   gap: 20px;
-  padding: 40px calc(50vw - 130px);
+  padding: 40px calc(50vw - 220px);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -491,8 +491,8 @@ body { background: var(--black); overflow-x: hidden; }
 
 .evidence-card {
   flex-shrink: 0;
-  width: 220px;
-  height: 390px;
+  width: 440px;
+  height: 780px;
   border-radius: 12px;
   overflow: hidden;
   position: relative;
@@ -751,8 +751,8 @@ body { background: var(--black); overflow-x: hidden; }
   .stats { padding: 60px 20px; }
   .stats-grid { grid-template-columns: 1fr; }
 
-  .evidence-card { width: 180px; height: 320px; }
-  .evidence-scroll { padding: 40px calc(50vw - 90px); gap: 14px; }
+  .evidence-card { width: 280px; height: 500px; }
+  .evidence-scroll { padding: 40px calc(50vw - 140px); gap: 14px; }
 
   .quote-section { padding: 100px 20px; }
 
