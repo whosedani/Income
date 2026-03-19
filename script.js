@@ -181,6 +181,9 @@ document.querySelectorAll('.vid-sound').forEach(btn => {
       video.muted = false;
       video.volume = 0.5;
       btn.querySelector('span').textContent = '🔊';
+      gallerySoundActivated = true;
+    } else {
+      gallerySoundActivated = false;
     }
   });
 });
@@ -189,6 +192,8 @@ document.querySelectorAll('.vid-sound').forEach(btn => {
 const evidenceScroll = document.querySelector('.evidence-scroll');
 const evidenceCards = document.querySelectorAll('.evidence-card');
 const scrollbarThumb = document.querySelector('.evidence-scrollbar-thumb');
+let gallerySoundActivated = false; // becomes true after user unmutes first time
+let prevActiveIdx = -1;
 
 function updateGalleryFocus() {
   if (!evidenceScroll || evidenceCards.length === 0) return;
@@ -218,6 +223,19 @@ function updateGalleryFocus() {
     else if (diff === 1) card.classList.add('near');
   });
 
+  // auto-switch sound to focused card (only after user activated sound once)
+  if (gallerySoundActivated && closestIdx !== prevActiveIdx) {
+    document.querySelectorAll('.evidence-card video').forEach(v => { v.muted = true; });
+    document.querySelectorAll('.vid-sound span').forEach(s => { s.textContent = '🔇'; });
+
+    const activeCard = evidenceCards[closestIdx];
+    const activeVideo = activeCard.querySelector('video');
+    activeVideo.muted = false;
+    activeVideo.volume = 0.5;
+    activeCard.querySelector('.vid-sound span').textContent = '🔊';
+  }
+  prevActiveIdx = closestIdx;
+
   // update scrollbar thumb
   if (scrollbarThumb) {
     const maxScroll = evidenceScroll.scrollWidth - evidenceScroll.clientWidth;
@@ -228,7 +246,7 @@ function updateGalleryFocus() {
 
 if (evidenceScroll) {
   evidenceScroll.addEventListener('scroll', updateGalleryFocus, { passive: true });
-  // also handle click-to-center
+  // click-to-center
   evidenceCards.forEach(card => {
     card.addEventListener('click', () => {
       const scrollRect = evidenceScroll.getBoundingClientRect();
