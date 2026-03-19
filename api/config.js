@@ -49,9 +49,6 @@ export default async function handler(req, res) {
     const { hash, action, config } = body;
     const adminHash = process.env.ADMIN_HASH;
 
-    // Debug — remove after confirming
-    console.log('POST /api/config', { hashReceived: !!hash, hashLen: hash?.length, adminHashSet: !!adminHash, adminHashLen: adminHash?.length, match: hash === adminHash });
-
     if (!hash || !adminHash || hash !== adminHash) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
