@@ -45,8 +45,12 @@ export default async function handler(req, res) {
 
   // POST — admin actions
   if (req.method === 'POST') {
-    const { hash, action, config } = req.body || {};
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const { hash, action, config } = body;
     const adminHash = process.env.ADMIN_HASH;
+
+    // Debug — remove after confirming
+    console.log('POST /api/config', { hashReceived: !!hash, hashLen: hash?.length, adminHashSet: !!adminHash, adminHashLen: adminHash?.length, match: hash === adminHash });
 
     if (!hash || !adminHash || hash !== adminHash) {
       return res.status(401).json({ error: 'Unauthorized' });
