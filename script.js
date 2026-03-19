@@ -323,5 +323,131 @@ function triggerGlitch() {
 }
 setInterval(triggerGlitch, 5000);
 
+/* ========== ATMOSPHERE: CURSOR GLOW ========== */
+if (!matchMedia('(hover: none)').matches) {
+  const glow = document.createElement('div');
+  glow.className = 'cursor-glow';
+  document.body.appendChild(glow);
+
+  document.addEventListener('mousemove', (e) => {
+    requestAnimationFrame(() => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+      if (!glow.classList.contains('visible')) glow.classList.add('visible');
+    });
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => glow.classList.remove('visible'));
+  document.addEventListener('mouseenter', () => glow.classList.add('visible'));
+}
+
+/* ========== ATMOSPHERE: FLOATING PARTICLES ========== */
+(function initParticles() {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'particle-canvas';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const isMobile = window.innerWidth < 768;
+  const PARTICLE_COUNT = isMobile ? 10 : 22;
+
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.scale(dpr, dpr);
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  const particles = [];
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 0.5 + Math.random() * 1.2,
+      opacity: 0.06 + Math.random() * 0.14,
+      speedY: -(0.08 + Math.random() * 0.22),
+      speedX: (Math.random() - 0.5) * 0.1,
+      drift: Math.random() * Math.PI * 2
+    });
+  }
+
+  let frame = 0;
+  let paused = false;
+
+  document.addEventListener('visibilitychange', () => {
+    paused = document.hidden;
+  });
+
+  function animate() {
+    if (paused) { requestAnimationFrame(animate); return; }
+    frame++;
+    if (frame % 2 !== 0) { requestAnimationFrame(animate); return; } // 30fps
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    ctx.clearRect(0, 0, w, h);
+
+    particles.forEach(p => {
+      p.y += p.speedY;
+      p.x += p.speedX + Math.sin(frame * 0.005 + p.drift) * 0.03;
+
+      if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+      if (p.x < -10) p.x = w + 10;
+      if (p.x > w + 10) p.x = -10;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(184, 160, 106, ${p.opacity})`;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* ========== ATMOSPHERE: THE WATCHER ========== */
+(function initWatcher() {
+  const watcher = document.createElement('div');
+  watcher.className = 'watcher';
+  document.body.appendChild(watcher);
+
+  const positions = [
+    { top: '10%', left: '5%' },
+    { top: '70%', left: '90%' },
+    { top: '30%', left: '85%' },
+    { top: '80%', left: '10%' },
+    { top: '15%', left: '75%' },
+    { top: '60%', left: '3%' },
+    { top: '45%', left: '92%' },
+    { top: '85%', left: '50%' }
+  ];
+
+  let lastPos = -1;
+
+  function reposition() {
+    let idx;
+    do { idx = Math.floor(Math.random() * positions.length); } while (idx === lastPos);
+    lastPos = idx;
+    watcher.style.top = positions[idx].top;
+    watcher.style.left = positions[idx].left;
+  }
+
+  reposition();
+
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    watcher.style.opacity = '0';
+    scrollTimeout = setTimeout(() => {
+      reposition();
+      watcher.style.opacity = '';
+    }, 3000);
+  }, { passive: true });
+})();
+
 /* ========== INIT ========== */
 loadConfig();
