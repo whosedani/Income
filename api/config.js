@@ -9,19 +9,26 @@ async function kvGet() {
   });
   const data = await res.json();
   if (data.result) {
-    try { return JSON.parse(data.result); } catch { return {}; }
+    // Upstash returns a string — may be double-encoded from old writes
+    let parsed = data.result;
+    if (typeof parsed === 'string') {
+      try { parsed = JSON.parse(parsed); } catch { return {}; }
+    }
+    if (typeof parsed === 'string') {
+      try { parsed = JSON.parse(parsed); } catch { return {}; }
+    }
+    return typeof parsed === 'object' && parsed !== null ? parsed : {};
   }
   return {};
 }
 
 async function kvSet(value) {
-  await fetch(`${process.env.KV_REST_API_URL}/set/${KV_KEY}`, {
-    method: 'POST',
+  const str = JSON.stringify(value);
+  await fetch(`${process.env.KV_REST_API_URL}/set/${KV_KEY}/${encodeURIComponent(str)}`, {
+    method: 'GET',
     headers: {
-      Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(JSON.stringify(value))
+      Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`
+    }
   });
 }
 
