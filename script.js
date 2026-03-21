@@ -35,8 +35,6 @@ function applyConfig() {
     if (el && url) el.href = url;
   };
 
-  setHref('twitterLink', CONFIG.twitter);
-  setHref('twitterBtn', CONFIG.twitter);
   setHref('communityLink', CONFIG.community);
   setHref('communityBtn', CONFIG.community);
   setHref('buyButton', CONFIG.buy);
