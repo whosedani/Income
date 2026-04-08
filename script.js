@@ -91,7 +91,7 @@ heroSoundBtn.addEventListener('click', () => {
 const phrases = [
   "he doesn't have a job. he has a system.",
   "unemployed since never. retired since always.",
-  "the bag is not explained. it is simply present.",
+  "the income is not explained. it is simply present.",
   "you know the type. you are the type."
 ];
 
