@@ -1,7 +1,7 @@
 // Vercel serverless function — /api/config
 // Env vars: KV_REST_API_URL, KV_REST_API_TOKEN, ADMIN_HASH
 
-const KV_KEY = 'income_config';
+const KV_KEY = 'income_site_config';
 
 async function kvGet() {
   const res = await fetch(`${process.env.KV_REST_API_URL}/get/${KV_KEY}`, {
