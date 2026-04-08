@@ -56,8 +56,17 @@ export default async function handler(req, res) {
     const { hash, action, config } = body;
     const adminHash = process.env.ADMIN_HASH;
 
-    if (!hash || !adminHash || hash !== adminHash) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    if (!hash || !adminHash || hash.trim() !== adminHash.trim()) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        debug: {
+          hashLen: hash ? hash.length : 0,
+          adminHashLen: adminHash ? adminHash.length : 0,
+          hashStart: hash ? hash.slice(0, 8) : 'none',
+          adminHashStart: adminHash ? adminHash.slice(0, 8) : 'none',
+          match: hash === adminHash
+        }
+      });
     }
 
     if (action === 'verify') {
